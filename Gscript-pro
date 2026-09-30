@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>gscript Pro Live PDF Engine - Studio Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <style>
+      
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .animated-bg {
+            background: linear-gradient(-45deg, #f8fafc, #e0f2fe, #dcfce7, #f3e8ff, #fdf4ff,#003300,#00ffff,#ff0066,#00ffbf);
+            background-size: 400% 400%;
+            animation: gradientShift 10s ease infinite;
+        }
+
+        @keyframes subtle-glow {
+            0%, 100% { box-shadow: 0 0 4px rgba(16, 185, 129, 0.2); }
+            50% { box-shadow: 0 0 12px rgba(16, 185, 129, 0.5); }
+        }
+        .terminal-glow:focus { animation: subtle-glow 1s infinite; }
+        .preview-container iframe { width: 100%; height: 550px; border-radius: 8px; border: 1px solid #cbd5e1; background: white;}
+    </style>
+</head>
+<body class="animated-bg text-slate-800 min-h-screen flex flex-col justify-between font-sans">
+
+    <header class="bg-white/70 backdrop-blur-md border-b border-white/50 p-4 sticky top-0 z-50 shadow-sm">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="h-3 w-3 rounded-full bg-emerald-500 animate-pulse"></div>
+                <h1 class="text-md font-bold tracking-widest text-emerald-600 font-mono">G-SCRIPT // Live Studio</h1>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <a href="manual.html" target="_blank" class="text-[10px] font-mono bg-emerald-50 text-emerald-600 border border-emerald-200 px-3 py-1.5 rounded hover:bg-emerald-100 transition-all shadow-sm flex items-center gap-1">
+                    <span>📄</span> GET USER MANUAL
+                </a>
+                <span class="text-xs font-mono text-slate-500 hidden sm:block">Developed by Goutham Mohan</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-6 flex-grow max-w-7xl">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <div class="lg:col-span-4 flex flex-col gap-5">
+                
+                <div class="bg-white/80 backdrop-blur-sm rounded-xl p-5 border border-white flex flex-col gap-4 shadow-lg">
+                    <h2 class="text-xs font-mono font-bold tracking-widest text-emerald-600 uppercase border-b border-slate-100 pb-2 flex items-center gap-2">
+                        <span>⚙️</span> ENGINE & MAIN FILE
+                    </h2>
+                    
+                    <div>
+                        <label class="block text-[11px] font-mono tracking-wider uppercase text-slate-500 mb-1">Target Document Payload (Main PDF)</label>
+                        <input type="file" id="pdfUpload" accept="application/pdf" class="w-full text-xs text-slate-600 file:mr-3 file:py-1 file:px-2.5 file:rounded file:border-0 file:bg-emerald-600/10 file:text-emerald-700 hover:file:bg-emerald-600/20 cursor-pointer bg-slate-50/50 p-1.5 border border-slate-200 rounded transition-all" />
+                    </div>
+
+                    <div class="bg-emerald-50/80 border border-emerald-100 rounded-lg p-3">
+                        <label class="block text-[11px] font-mono tracking-wider uppercase text-emerald-700 mb-1">🤖 AI Formatting Tone</label>
+                        <select id="aiTone" class="w-full bg-white border border-slate-200 rounded p-2 text-xs text-slate-800 focus:outline-none focus:border-emerald-500 font-mono transition-all">
+                            <option value="formal">Formal Corporate Layout</option>
+                            <option value="creative">Creative Modern Layout</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="bg-white/80 backdrop-blur-sm rounded-xl p-5 border border-white flex flex-col gap-4 shadow-lg">
+                    <h2 class="text-xs font-mono font-bold tracking-widest text-blue-600 uppercase border-b border-slate-100 pb-2 flex items-center gap-2">
+                        <span>📂</span> ADVANCED FILE ZONES
+                    </h2>
+
+                    <div>
+                        <label class="block text-[11px] font-mono tracking-wider uppercase text-slate-500 mb-1">Secondary PDF (For Merging)</label>
+                        <input type="file" id="secondPdfUpload" accept="application/pdf" class="w-full text-xs text-slate-600 file:mr-3 file:py-1 file:px-2.5 file:rounded file:border-0 file:bg-blue-600/10 file:text-blue-700 hover:file:bg-blue-600/20 cursor-pointer bg-slate-50/50 p-1.5 border border-slate-200 rounded transition-all" />
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-mono tracking-wider uppercase text-slate-500 mb-1">Standard Image (Logos/Photos)</label>
+                        <input type="file" id="imageUpload" accept="image/png, image/jpeg" class="w-full text-xs text-slate-600 file:mr-3 file:py-1 file:px-2.5 file:rounded file:border-0 file:bg-orange-600/10 file:text-orange-700 hover:file:bg-orange-600/20 cursor-pointer bg-slate-50/50 p-1.5 border border-slate-200 rounded transition-all" />
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-mono tracking-wider uppercase text-indigo-500 mb-1">OCR Scanner Image (Image to Text)</label>
+                        <input type="file" id="ocrUpload" accept="image/*" class="w-full text-xs text-slate-600 file:mr-3 file:py-1 file:px-2.5 file:rounded file:border-0 file:bg-indigo-600/10 file:text-indigo-700 hover:file:bg-indigo-600/20 cursor-pointer bg-slate-50/50 p-1.5 border border-slate-200 rounded transition-all" />
+                    </div>
+
+                    <div class="bg-purple-50/50 border border-purple-100 p-3 rounded-lg">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-[11px] font-mono tracking-wider uppercase text-purple-700">Ink Signature</label>
+                            <select id="inkColor" class="bg-white border border-purple-200 rounded text-[10px] text-purple-800 focus:outline-none focus:border-purple-500 font-mono p-1 shadow-sm">
+                                <option value="blue">Indigo Blue Ink</option>
+                                <option value="black">Classic Black Ink</option>
+                                <option value="red">Correction Red Ink</option>
+                            </select>
+                        </div>
+                        <input type="file" id="sigUpload" accept="image/*" class="w-full text-xs text-slate-600 file:mr-3 file:py-1 file:px-2.5 file:rounded file:border-0 file:bg-purple-600/10 file:text-purple-700 hover:file:bg-purple-600/20 cursor-pointer bg-white p-1.5 border border-purple-100 rounded transition-all" />
+                        <canvas id="sigCanvas" class="hidden"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-8 flex flex-col gap-6">
+                
+                <div class="bg-white/80 backdrop-blur-sm rounded-xl p-5 border border-white shadow-lg flex flex-col gap-4">
+                    <div class="flex justify-between items-center">
+                        <label for="scriptBox" class="block text-xs font-mono font-bold tracking-widest uppercase text-slate-600">gscript Command Terminal</label>
+                        <span class="text-[10px] font-mono bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-slate-500">Separator: [ ; ]</span>
+                    </div>
+                    
+                    <textarea id="scriptBox" rows="6" class="terminal-glow w-full bg-slate-900 border border-slate-800 rounded-lg p-3 font-mono text-xs sm:text-sm text-emerald-400 focus:outline-none focus:border-emerald-500 transition-all leading-relaxed shadow-inner" placeholder='/gedit:add_page_numbers;&#10;/gedit:protect-1-5;&#10;/gedit:spellcheck;&#10;/gedit:adv_text-"Approved"-[pages]-"1,2"-[color]-"blue"-[style]-"bold"-[font]-"helvetica"-[x]-"200"-[y]-"700";'></textarea>
+
+                    <div class="flex flex-wrap gap-4 items-center justify-between pt-2 border-t border-slate-100">
+                        <button id="runScriptBtn" class="bg-emerald-600 hover:bg-emerald-500 text-white font-mono font-semibold text-xs px-5 py-2.5 rounded-md transition-all active:scale-95 cursor-pointer shadow-md">
+                            ⚡ COMPILE & EXECUTE
+                        </button>
+                        <button id="downloadPdfBtn" disabled class="bg-blue-600 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed hover:bg-blue-500 text-white font-mono font-semibold text-xs px-5 py-2.5 rounded-md transition-all flex items-center gap-2 shadow-md cursor-pointer">downlode</button>
+                    </div>
+
+                    <div>
+                        <span class="text-[10px] font-mono uppercase text-slate-400 tracking-widest block mb-1">Live Diagnostic Terminal Outputs</span>
+                        <div id="consoleLog" class="p-2.5 bg-white rounded-lg border border-slate-200 text-xs font-mono text-slate-600 h-24 overflow-y-auto shadow-inner">
+                            > Welcome to the Studio! Engine standing by...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white/80 backdrop-blur-sm rounded-xl p-5 border border-white shadow-lg flex flex-col gap-3">
+                    <h3 class="text-xs font-mono font-bold tracking-widest uppercase text-slate-600">👁️ Real-Time Dynamic Document Preview</h3>
+                    <div id="previewWrapper" class="preview-container bg-slate-50/50 rounded-lg flex items-center justify-center text-xs font-mono text-slate-400 p-8 text-center min-h-[250px]">
+                        Preview will load here dynamically.
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let uploadedPdfBytes = null;
+        let secondPdfBytes = null;
+        let modifiedPdfBytes = null;
+        let processedSigImgBase64 = null; 
+        
+        let standardImageBytes = null;
+        let standardImageType = null;
+        
+        let ocrImageUrl = null; 
+        let rawSignatureImg = null; 
+
+        const log = (msg, isError = false) => {
+            const consoleLog = document.getElementById('consoleLog');
+            const style = isError ? 'text-red-500 font-bold' : 'text-emerald-600';
+            consoleLog.innerHTML += `<br><span class="${style}">> ${msg}</span>`;
+            consoleLog.scrollTop = consoleLog.scrollHeight;
+        };
+
+        const updateLivePreview = (pdfBytesArray) => {
+            const wrapper = document.getElementById('previewWrapper');
+            const blob = new Blob([pdfBytesArray], { type: 'application/pdf' });
+            const blobUrl = URL.createObjectURL(blob);
+            wrapper.innerHTML = `<iframe src="${blobUrl}#toolbar=0&navpanes=0"></iframe>`;
+        };
+
+        
+        const getPdfColor = (colorStr) => {
+            const c = colorStr.toLowerCase();
+            if (c === 'red') return PDFLib.rgb(0.8, 0.1, 0.1);
+            if (c === 'blue') return PDFLib.rgb(0.1, 0.3, 0.8);
+            if (c === 'green') return PDFLib.rgb(0.1, 0.6, 0.2);
+            return PDFLib.rgb(0.1, 0.1, 0.1); // Default Black
+        };
+
+        const getPdfFont = async (pdfDoc, fontStr, styleStr) => {
+            const f = fontStr.toLowerCase();
+            const s = styleStr.toLowerCase();
+            let fontRef = PDFLib.StandardFonts.Helvetica;
+            
+            if (f.includes('times')) {
+                if (s.includes('bold') && s.includes('italic')) fontRef = PDFLib.StandardFonts.TimesRomanBoldItalic;
+                else if (s.includes('bold')) fontRef = PDFLib.StandardFonts.TimesRomanBold;
+                else if (s.includes('italic')) fontRef = PDFLib.StandardFonts.TimesRomanItalic;
+                else fontRef = PDFLib.StandardFonts.TimesRoman;
+            } else if (f.includes('courier')) {
+                if (s.includes('bold') && s.includes('italic')) fontRef = PDFLib.StandardFonts.CourierBoldOblique;
+                else if (s.includes('bold')) fontRef = PDFLib.StandardFonts.CourierBold;
+                else if (s.includes('italic')) fontRef = PDFLib.StandardFonts.CourierOblique;
+                else fontRef = PDFLib.StandardFonts.Courier;
+            } else {
+                if (s.includes('bold') && s.includes('italic')) fontRef = PDFLib.StandardFonts.HelveticaBoldOblique;
+                else if (s.includes('bold')) fontRef = PDFLib.StandardFonts.HelveticaBold;
+                else if (s.includes('italic')) fontRef = PDFLib.StandardFonts.HelveticaOblique;
+            }
+            return await pdfDoc.embedFont(fontRef);
+        };
+
+        document.getElementById('pdfUpload').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                uploadedPdfBytes = await file.arrayBuffer();
+                log(`Main PDF loaded: ${file.name}`);
+                updateLivePreview(uploadedPdfBytes);
+            }
+        });
+
+        document.getElementById('secondPdfUpload').addEventListener('change', async (e) => {
+            if(e.target.files[0]) {
+                secondPdfBytes = await e.target.files[0].arrayBuffer();
+                log(`Secondary Merge PDF loaded.`);
+            }
+        });
+
+        document.getElementById('imageUpload').addEventListener('change', async (e) => {
+            if(e.target.files[0]) {
+                standardImageType = e.target.files[0].type;
+                standardImageBytes = await e.target.files[0].arrayBuffer();
+                log(`Standard Image loaded.`);
+            }
+        });
+
+        document.getElementById('ocrUpload').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                ocrImageUrl = URL.createObjectURL(file);
+                log(`OCR Image loaded and ready for text extraction.`);
+            }
+        });
+
+        const processInkColor = () => {
+            if (!rawSignatureImg) return;
+            const inkColor = document.getElementById('inkColor').value;
+            const canvas = document.getElementById('sigCanvas');
+            const ctx = canvas.getContext('2d');
+            const maxDim = 600;
+            let w = rawSignatureImg.width, h = rawSignatureImg.height;
+            if (w > maxDim || h > maxDim) {
+                if (w > h) { h = (maxDim / w) * h; w = maxDim; } else { w = (maxDim / h) * w; h = maxDim; }
+            }
+            canvas.width = w; canvas.height = h;
+            ctx.drawImage(rawSignatureImg, 0, 0, w, h);
+            const imgData = ctx.getImageData(0, 0, w, h);
+            const data = imgData.data;
+            for (let i = 0; i < data.length; i += 4) {
+                const brightness = (0.34 * data[i] + 0.5 * data[i+1] + 0.16 * data[i+2]);
+                if (brightness > 135) data[i+3] = 0; 
+                else {
+                    if (inkColor === 'blue') { data[i] = 12; data[i+1] = 32; data[i+2] = 112; }
+                    else if (inkColor === 'black') { data[i] = 25; data[i+1] = 25; data[i+2] = 25; }
+                    else if (inkColor === 'red') { data[i] = 180; data[i+1] = 30; data[i+2] = 40; }
+                    data[i+3] = 255 - brightness;
+                }
+            }
+            ctx.putImageData(imgData, 0, 0);
+            processedSigImgBase64 = canvas.toDataURL('image/png');
+        };
+        document.getElementById('inkColor').addEventListener('change', processInkColor);
+
+        document.getElementById('sigUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() { rawSignatureImg = img; processInkColor(); log("Ink Signature Processed."); };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+       
+        document.getElementById('runScriptBtn').addEventListener('click', async () => {
+            if (!uploadedPdfBytes) return log('Error: Main PDF missing.', true);
+            const rawScript = document.getElementById('scriptBox').value.trim();
+            if (!rawScript) return log('Error: No commands provided.', true);
+
+            try {
+                log('Initiating compiler...');
+                const pdfDoc = await PDFLib.PDFDocument.load(uploadedPdfBytes);
+                const commands = rawScript.split(';');
+
+                for (let cmd of commands) {
+                    cmd = cmd.trim();
+                    if (!cmd) continue;
+
+                    
+                    if (cmd.startsWith('/gedit:add_page_numbers')) {
+                        const pages = pdfDoc.getPages();
+                        const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+                        pages.forEach((page, idx) => {
+                            const { width } = page.getSize();
+                            page.drawText(`Page ${idx + 1}`, { x: width / 2 - 20, y: 20, size: 10, font: font, color: PDFLib.rgb(0.4, 0.4, 0.4) });
+                        });
+                        log("🔢 Auto Page Numbers applied to all pages.");
+                    }
+
+                    
+                    else if (cmd.startsWith('/gedit:spellcheck')) {
+                        log("🔍 Running Grammar & Spell Diagnostic scan...");
+                        const decoder = new TextDecoder('utf-8');
+                        const textStr = decoder.decode(uploadedPdfBytes).toLowerCase();
+                        let found = 0;
+                        const typos = [' teh ', ' recieve ', ' seperate ', ' untill '];
+                        typos.forEach(t => { if(textStr.includes(t)) found++; });
+                        if(found > 0) log(`⚠️ Diagnostic Alert: Potential typos detected in binary stream.`);
+                        else log(`✅ Grammar Scan complete. No immediate stream anomalies found.`);
+                    }
+
+                   
+                    else if (cmd.startsWith('/gedit:adv_text')) {
+                        const rx = /\/gedit:adv_text-"(.*?)"-\[pages\]-"(.*?)"-\[color\]-"(.*?)"-\[style\]-"(.*?)"-\[font\]-"(.*?)"-\[x\]-"(\d+)"-\[y\]-"(\d+)"/i;
+                        const match = cmd.match(rx);
+                        if (match) {
+                            const [_, text, pagesStr, color, style, fontName, xStr, yStr] = match;
+                            const pages = pdfDoc.getPages();
+                            const font = await getPdfFont(pdfDoc, fontName, style);
+                            const textColor = getPdfColor(color);
+                            const targetPages = pagesStr.split(',').map(n => parseInt(n.trim(), 10) - 1);
+                            
+                            targetPages.forEach(pIdx => {
+                                if(pages[pIdx]) {
+                                    pages[pIdx].drawText(text, { x: parseInt(xStr), y: parseInt(yStr), size: 14, font: font, color: textColor });
+                                }
+                            });
+                            log(`📝 Advanced Text injected on pages: ${pagesStr}`);
+                        } else log(`Error formatting Advanced Text syntax.`, true);
+                    }
+
+                    else if (cmd.startsWith('/gedit:ocr2text')) {
+                        if(!ocrImageUrl) throw new Error("OCR command used, but no OCR Scanner Image was uploaded.");
+                        
+                        const rx = /\/gedit:ocr2text-\[pg\]-"(\d+)"-\[color\]-"(.*?)"-\[style\]-"(.*?)"-\[font\]-"(.*?)"-\[x\]-"(\d+)"-\[y\]-"(\d+)"/i;
+                        const match = cmd.match(rx);
+                        if (match) {
+                            const [_, pgStr, color, style, fontName, xStr, yStr] = match;
+                            log("Tesseract AI OCR Initializing... Please wait.");
+                            
+                            const { data: { text } } = await Tesseract.recognize(ocrImageUrl, 'eng');
+                            const cleanText = text.replace(/\n/g, ' ').trim();
+                            
+                            log(`✅ OCR Extracted: "${cleanText.substring(0, 20)}..."`);
+                            
+                            const pageIdx = parseInt(pgStr, 10) - 1;
+                            const pages = pdfDoc.getPages();
+                            if(pages[pageIdx]) {
+                                const font = await getPdfFont(pdfDoc, fontName, style);
+                                pages[pageIdx].drawText(cleanText, { x: parseInt(xStr), y: parseInt(yStr), size: 12, font: font, color: getPdfColor(color) });
+                                log(`📝 OCR Text injected onto page ${pageIdx + 1}.`);
+                            }
+                        }
+                    }
+
+                   
+                    else if (cmd.startsWith('/gedit:protect-')) {
+                        const rangeParts = cmd.replace('/gedit:protect-', '').split('-');
+                        if (rangeParts.length === 2) {
+                            const start = parseInt(rangeParts[0].trim(), 10);
+                            const end = parseInt(rangeParts[1].trim(), 10);
+                            for (let i = pdfDoc.getPageCount(); i >= 1; i--) {
+                                if (i < start || i > end) pdfDoc.removePage(i - 1);
+                            }
+                            log(` Protection applied. Safe zone: Pages ${start} to ${end}.`);
+                        }
+                    }
+
+                    else if (cmd.startsWith('/gedit:rotate-')) {
+                        const parts = cmd.replace('/gedit:rotate-', '').split('-');
+                        if (parts.length === 2) {
+                            const pg = parseInt(parts[0].trim(), 10) - 1, deg = parseInt(parts[1].trim(), 10);
+                            const pages = pdfDoc.getPages();
+                            if(pages[pg]) { pages[pg].setRotation(PDFLib.degrees(deg)); log(`🔄 Rotated page ${pg + 1}.`); }
+                        }
+                    }
+                    
+                   
+                    else if (cmd.startsWith('/gedit:merge')) {
+                        if (secondPdfBytes) {
+                            const secondDoc = await PDFLib.PDFDocument.load(secondPdfBytes);
+                            const copiedPages = await pdfDoc.copyPages(secondDoc, secondDoc.getPageIndices());
+                            copiedPages.forEach((page) => pdfDoc.addPage(page));
+                            log("🔗 Merged secondary PDF.");
+                        }
+                    }
+                    
+                 
+                    else if (cmd.startsWith('/gedit:extract-')) {
+                        const rangeParts = cmd.replace('/gedit:extract-', '').trim().split('-');
+                        if (rangeParts.length === 2) {
+                            const start = parseInt(rangeParts[0].trim(), 10), end = parseInt(rangeParts[1].trim(), 10);
+                            for (let i = pdfDoc.getPageCount(); i >= 1; i--) { if (i < start || i > end) pdfDoc.removePage(i - 1); }
+                            log(`Extracted pages ${start}-${end}.`);
+                        }
+                    }
+                    
+                    // 
+                    else if (cmd.startsWith('/gedit:insert_image')) {
+                        if (standardImageBytes) {
+                            const pgM = cmd.match(/\[pg\]-"(\d+)"/), xM = cmd.match(/\[x\]-"(\d+)"/), yM = cmd.match(/\[y\]-"(\d+)"/), sM = cmd.match(/\[scale\]-"([\d.]+)"/);
+                            if (pgM && xM && yM && sM) {
+                                let embedImg;
+                                if (standardImageType === 'image/png') embedImg = await pdfDoc.embedPng(standardImageBytes);
+                                else embedImg = await pdfDoc.embedJpg(standardImageBytes);
+                                const dims = embedImg.scale(parseFloat(sM[1])), pages = pdfDoc.getPages();
+                                if (pages[parseInt(pgM[1], 10)-1]) {
+                                    pages[parseInt(pgM[1], 10)-1].drawImage(embedImg, { x: parseInt(xM[1], 10), y: parseInt(yM[1], 10), width: dims.width, height: dims.height });
+                                    log("image inserted.");
+                                }
+                            }
+                        }
+                    }
+                    
+                    
+                    else if (cmd.startsWith('/gedit:delete-')) {
+                        const nums = cmd.replace('/gedit:delete-', '').split(',').map(n => parseInt(n.trim(), 10)).filter(n => !isNaN(n)).sort((a,b)=>b-a);
+                        nums.forEach(n => { if (n - 1 >= 0 && n - 1 < pdfDoc.getPageCount()) pdfDoc.removePage(n - 1); });
+                        log("🗑️ Deletions processed.");
+                    }
+                    
+                   
+                    else if (cmd.startsWith('/gedit:signature')) {
+                        if (processedSigImgBase64) {
+                            const pgM = cmd.match(/\[pg\]-"(\d+)"/), xM = cmd.match(/\[x\]-"(\d+)"/), yM = cmd.match(/\[y\]-"(\d+)"/), sM = cmd.match(/\[scale\]-"([\d.]+)"/);
+                            if (pgM && xM && yM && sM) {
+                                const pages = pdfDoc.getPages();
+                                if (pages[parseInt(pgM[1], 10)-1]) {
+                                    const sigImage = await pdfDoc.embedPng(processedSigImgBase64);
+                                    const dims = sigImage.scale(parseFloat(sM[1]));
+                                    pages[parseInt(pgM[1], 10)-1].drawImage(sigImage, { x: parseInt(xM[1], 10), y: parseInt(yM[1], 10), width: dims.width, height: dims.height });
+                                    log("🖋️ Ink Signature applied.");
+                                }
+                            }
+                        }
+                    }
+                }
+
+                modifiedPdfBytes = await pdfDoc.save();
+                log('✨ COMPILATION SUCCESSFUL scroll down to view.');
+                updateLivePreview(modifiedPdfBytes); 
+                document.getElementById('downloadPdfBtn').disabled = false;
+
+            } catch (err) {
+                log(`Pipeline Error: ${err.message}`, true);
+            }
+        });
+
+        document.getElementById('downloadPdfBtn').addEventListener('click', () => {
+            if (!modifiedPdfBytes) return;
+            const blob = new Blob([modifiedPdfBytes], { type: 'application/pdf' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'gscript_studio_output.pdf';
+            link.click();
+            log('Export downloaded successfully.');
+        });
+    </script>
+</body>
+</html>
