@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>gscript Pro Live PDF Engine - Studio Edition</title>
+    <title>Egscript (enhanced general script) Pro Live PDF Engine - Studio Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
@@ -34,7 +34,7 @@
         <div class="container mx-auto flex justify-between items-center">
             <div class="flex items-center gap-3">
                 <div class="h-3 w-3 rounded-full bg-emerald-500 animate-pulse"></div>
-                <h1 class="text-md font-bold tracking-widest text-emerald-600 font-mono">G-SCRIPT // Live Studio</h1>
+                <h1 class="text-md font-bold tracking-widest text-emerald-600 font-mono">EG-SCRIPT // Live Studio</h1>
             </div>
             
             <div class="flex items-center gap-4">
@@ -109,7 +109,7 @@
                 
                 <div class="bg-white/80 backdrop-blur-sm rounded-xl p-5 border border-white shadow-lg flex flex-col gap-4">
                     <div class="flex justify-between items-center">
-                        <label for="scriptBox" class="block text-xs font-mono font-bold tracking-widest uppercase text-slate-600">gscript Command Terminal</label>
+                        <label for="scriptBox" class="block text-xs font-mono font-bold tracking-widest uppercase text-slate-600">Egscript Command Terminal</label>
                         <span class="text-[10px] font-mono bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-slate-500">Separator: [ ; ]</span>
                     </div>
                     
